@@ -1,11 +1,22 @@
 <script lang="ts">
+    import { Cloudinary } from '@cloudinary/url-gen'
+    import { backgroundRemoval } from '@cloudinary/url-gen/actions/effect'
     import { ImageStatus } from './types.d';
-    import { imageStatus, originalImage } from './store';
+    import { imageStatus, modifiedImage, originalImage } from './store';
     import Dropzone from 'dropzone';
     import 'dropzone/dist/dropzone.css';
 
     import { onMount } from 'svelte';
     import { claim_svg_element } from 'svelte/internal';
+
+    const cloudinary = new Cloudinary({
+        cloud: {
+            cloudName: 'dub6qyl4j',
+        },
+        url: {
+            secure: true
+        }
+    })
 
     onMount(() => {
         const dropzone = new Dropzone('#dropzone', {
@@ -18,22 +29,29 @@
             imageStatus.set(ImageStatus.UPLOADING)
             //aqui podemos añadir la apiKey, configuracion
             formData.append('upload_preset', 'h3rly80')
-            formData.append('timestamp', (Date.now() / 1000))
+            formData.append('timestamp', (Date.now() / 1000));
             formData.append('api_key', 547289569715651)
         })
 
         dropzone.on('success', (file, response) => {
-            const {
-                secure_url: url
+            const { 
+                public_id : publicId, 
+                secure_url: url 
             } = response
             
-            imageStatus.set(ImageStatus.DONE)
-            originalImage.set(url)
+            console.log(response)
 
             //crear la imagen con fondo transparente 
             //guardar en el backgroundImage
-            
-            console.log(response)
+            const imageWithoutBackground = cloudinary
+                .image(publicId)
+                .effect(backgroundRemoval())
+
+            console.log(imageWithoutBackground.toURL())
+        
+            imageStatus.set(ImageStatus.DONE)
+            modifiedImage.set(imageWithoutBackground.toURL())
+            originalImage.set(url)
         })
 
         dropzone.on('error', (file, response) => {

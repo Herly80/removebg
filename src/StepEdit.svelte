@@ -1,13 +1,32 @@
 <script lang="ts">
     import "two-up-element"
-    import { originalImage } from "./store";
+    import { originalImage, modifiedImage } from "./store";
+
+    let processingImage = true
+    let tries = 0
+    let intervalId: any
+
+    $: {
+        if (processingImage) {
+            clearInterval(intervalId)
+            intervalId = setInterval(() => {
+                tries++
+            }, 500)
+        }
+    }
 </script>
 
 <two-up>
 <img src={$originalImage} alt="Imagen original subida por el usuario" />
-<img src="" alt="Imagen sin fondo" />
+<img 
+on:load={() => (processingImage = false)}
+on:error={() => (processingImage = true)}
+src={`${$modifiedImage}&t=${tries}`} 
+alt="Imagen sin fondo" />
 </two-up>
 
-<a download href="" class="bg-blue-500 hover:bg-blue-700 text-xl text-center w-full font-bold text-white rounded-full px-4 py-2">
+<a 
+download 
+href= {$modifiedImage} class="bg-blue-500 hover:bg-blue-700 text-xl text-center w-full font-bold text-white rounded-full px-4 py-2">
     Descargar imagen sin fondo
 </a>
