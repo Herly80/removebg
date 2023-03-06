@@ -2,7 +2,10 @@
   import Dropzone from 'dropzone';
   import 'dropzone/dist/dropzone.css'
   import CloudinaryLogo from './CloudinaryLogo.svelte';
+    import StepEdit from './StepEdit.svelte';
     import StepUpload from './StepUpload.svelte';
+    import { imageStatus } from './store';
+    import { ImageStatus } from './types.d';
 </script>
 <div class="max-w-xl m-auto grid grid-cols-1 place-content-center w-full h-screen p-4">
 
@@ -13,10 +16,13 @@
 </header>
 
 <main class="w-full block">
-  
-  <!-- svelte-ignore missing-declaration -->
+  {#if $imageStatus === ImageStatus.READY || $imageStatus === ImageStatus.UPLOADING}
   <StepUpload />
-  
+  {:else if $imageStatus === ImageStatus.DONE}
+  <StepEdit />
+  <!-- svelte-ignore missing-declaration -->
+ 
+  {/if}
 </main>
 
 
